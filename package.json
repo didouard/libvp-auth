@@ -1,0 +1,14 @@
+{
+  "name": "libav-auth",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "repository": "",
+  "author": "Edouard FERRARI <edouard@ferrari.wf>",
+  "dependencies": {
+    "async": "^2.0.1",
+    "node-wrapper": "0.0.32",
+    "request": "^2.75.0",
+    "tough-cookie-filestore": "0.0.1"
+  }
+}

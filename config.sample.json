@@ -1,0 +1,5 @@
+{
+    "auth": { "email": "email@gmail.com", "password": "password" }
+    , "cookies" : { "jar-file": "/tmp/cookies.json" }
+    , "logger": { "default": {"type": "console"} }
+}
