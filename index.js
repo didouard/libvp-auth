@@ -10,7 +10,9 @@ var auth = new Auth(config);
 
 auth.login((error, data) => {
     if (error) { logger.error(error); process.exit(1) }
-    logger.log(data);
+    //logger.log(data);
     
-    
+    auth.checkLogged((err, isLogged) => {
+        console.log(isLogged);
+    })
 });

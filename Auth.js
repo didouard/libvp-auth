@@ -30,12 +30,12 @@ var Auth = function (config) {
                 , jar: jar.get(config)
                 , followAllRedirects: true
             };
-            
+            console.log("lala", options);
             request(options, callback);
         };
         
         var setInitiate = (response, body, callback) => {
-            `pouet`
+
             initiate = true;
             return callback();
         };
@@ -45,7 +45,7 @@ var Auth = function (config) {
     };
 
     this.login = (callback) => {
-        if (initiate == false) return self.init(self.login, callback);
+        logger.debug("Authentificate");
         
         var options = {};
         
@@ -62,7 +62,7 @@ var Auth = function (config) {
 
         var requestAfter = (error, response, body) => {
             // manage redirection
-            logger.log("(%s) %s", response.statusCode, options.url);
+            /*/logger.log("(%s) %s", response.statusCode, options.url);/**/
             if (300 <= response.statusCode && response.statusCode < 400) {
                 var locationUrl = url.parse(response.headers.location);
                 var originUrl = url.parse(options.url);
@@ -74,18 +74,45 @@ var Auth = function (config) {
                 }
                 
                 options.url = url.format(originUrl);
+
+                if (/.*(Error_500).*/.test(options.url)) {
+                    logger.warning("Error detected, retry ...");
+                    return self.login(callback);   
+                }
+
+                if (/.*(authentication).*/.test(options.url)) logger.debug("Authentification");
+                else if (/.*(SiteSecure).*/.test(options.url)) logger.debug("Do cypher");
+                else if (/.*(homev6).*/.test(options.url)) logger.debug("Call final home");
+                else if (/.*(Home).*/.test(options.url)) logger.debug("Call Home");
                 
-                logger.log("Redicted to", options.url);
+                /*/logger.log("Redicted to", options.url);/**/
                 return request(options, requestAfter);    
             } else {
                 
-                logger.log('(%s) ', response.statusCode);
+                // Crapy code, you can do better
+                var matches = body.match(/.*errorTitle.*>(.*)<\/h1>/)
+                if (matches != null) logger.error(matches[1]);
+                
                 return callback(error);
             }
         };
         
         request(options, requestAfter);
     };
+    
+    this.checkLogged = function (callback) {
+        var cookies = jar.get(config).getCookies('https://secure.fr.vente-privee.com');
+        
+        for (var i = 0; i < cookies.length; i++) {
+            var matches = cookies[i].toString().match(/^infoMember=mid=([0-9]*);.*/);
+            console.log(cookies[i].toString(), " - ", matches);
+            if (matches != null) { 
+                logger.log("Logger, member id: %d", matches[1]);
+                return callback(null, true);
+            }
+        }
+        return callback(null, false);
+    }
 };
 
 module.exports = Auth;
